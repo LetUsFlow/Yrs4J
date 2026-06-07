@@ -4,11 +4,10 @@ It is still W.I.P. and by far not complete yet.
 
 A very first alpha is available on my Nexus (see below for Repo infos).
 
-This project is split up into 4 subprojects: 
+This project is split up into 3 subprojects: 
 - **yrs4j-bindings** - This subproject provides JNA Java bindings and a Java wrapper layer, simplifying integration and enhancing usability for Java developers. The bindings create a direct interface with the native library, while the wrapper layer abstracts the complexities of native calls into more manageable, object-oriented Java methods.
 - **yrs4j-native-windows** - This subproject includes the Windows-specific native libraries
 - **yrs4j-native-linux** - This subproject houses the Linux-specific native libraries
-- **yrs4j-native-mac** (not supported yet) - This subproject is planned to include the macOS-specific native libraries
 
 # Usage
 To use Yrs4J add a dependency for the Bindings and for the Native-Lib (may be multiple) your code should run on (see *Artifacts & Repository* section below) . 
@@ -20,7 +19,7 @@ You then can use the bindings like this:
 
     Yrs4J.init(WindowsLibLoader.create());
 
-Analogous to WindowsLibLoader, if you use the Linux Bindings use LinuxLibLoader or for Mac (later) MacLibLoader (**not yet implemented**).
+Analogous to WindowsLibLoader, if you use the Linux bindings use LinuxLibLoader.
 
 After initialization you can then either use the wrapper classes (not complete as of 01.05.2024) or the native JNA interface. 
 
@@ -68,10 +67,32 @@ You need to define the repo in your build script to use the dependencies
         <version>0.18.8</version>
     </dependency>
 
-### Mac
-... Coming soon ...
-
 # Development
+
+## Native Libraries
+The bundled native libraries are built from the upstream [y-crdt/y-crdt](https://github.com/y-crdt/y-crdt) `yffi` crate. The pinned version is read from `nativeLinuxVersion` and `nativeWindowsVersion` in `gradle.properties`; both currently point at `0.18.8`, so the build script checks out upstream tag `v0.18.8`.
+
+Build every supported native binary from Windows:
+
+    .\scripts\build-native.ps1
+
+or through Gradle:
+
+    .\gradlew.bat buildNative
+
+Build only one operating-system family:
+
+    .\gradlew.bat buildNativeWindows
+    .\gradlew.bat buildNativeLinux
+
+The Linux builds run inside WSL. The Linux aarch64 build expects the `aarch64-linux-gnu-gcc` cross linker to be available in WSL. The Windows aarch64 build uses Rust's `aarch64-pc-windows-msvc` target and requires the matching MSVC toolchain components.
+
+The script copies the produced `yffi` `cdylib` artifacts into the JNA resource paths used by the native jars:
+
+    yrs4j-native-linux/src/main/resources/linux-x86-64/libyrs.so
+    yrs4j-native-linux/src/main/resources/linux-aarch64/libyrs.so
+    yrs4j-native-windows/src/main/resources/win32-x86-64/libyrs.dll
+    yrs4j-native-windows/src/main/resources/win32-aarch64/libyrs.dll
 
 ## Building from Source
 In the root repository execute 
@@ -91,4 +112,3 @@ To test your changes with other projects you should be able to use your local ma
     gradlew publishToMavenLocal
 
 The maven packages should then be available in your local repository. You may have to change the version of the project you modified in the gradle.properties file, so that gradle recognizes the new version.
-

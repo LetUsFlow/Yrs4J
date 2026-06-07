@@ -57,12 +57,27 @@ project(':yrs4j-native-linux') {
     apply plugin: 'maven-publish'
 }
 
-project(':yrs4j-native-mac') {
+project(':yrs4j-native-windows') {
     apply plugin: 'java-library'
     apply plugin: 'maven-publish'
 }
 
-project(':yrs4j-native-windows') {
-    apply plugin: 'java-library'
-    apply plugin: 'maven-publish'
+def powershellExecutable = System.getProperty("os.name").toLowerCase().contains("windows") ? "powershell" : "pwsh"
+
+tasks.register('buildNative', Exec) {
+    group = 'build'
+    description = 'Build all bundled yffi native libraries for Windows and Linux through scripts/build-native.ps1.'
+    commandLine powershellExecutable, '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', file('scripts/build-native.ps1').absolutePath
+}
+
+tasks.register('buildNativeWindows', Exec) {
+    group = 'build'
+    description = 'Build bundled yffi native libraries for Windows x86_64 and aarch64.'
+    commandLine powershellExecutable, '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', file('scripts/build-native.ps1').absolutePath, '-Targets', 'windows-x64,windows-aarch64'
+}
+
+tasks.register('buildNativeLinux', Exec) {
+    group = 'build'
+    description = 'Build bundled yffi native libraries for Linux x86_64 and aarch64 in WSL.'
+    commandLine powershellExecutable, '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', file('scripts/build-native.ps1').absolutePath, '-Targets', 'linux-x64,linux-aarch64'
 }
