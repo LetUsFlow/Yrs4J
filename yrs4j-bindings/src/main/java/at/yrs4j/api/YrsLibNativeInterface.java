@@ -1348,7 +1348,7 @@ public interface YrsLibNativeInterface extends Library {
      * Original signature : <code>void yxmlelem_insert_attr(const YrsBranch*, YrsTransaction*, const char*, const char*)</code><br>
      * <i>native declaration : libyrs.h:1264</i>
      */
-    void yxmlelem_insert_attr(YrsBranch xml, YrsTransaction txn, String attr_name, String attr_value);
+    void yxmlelem_insert_attr(YrsBranch xml, YrsTransaction txn, String attr_name, YrsInput attr_value);
 
     /**
      * Removes an attribute from a current `YXmlElement`, given its name.
@@ -1373,7 +1373,7 @@ public interface YrsLibNativeInterface extends Library {
      * Original signature : <code>char* yxmlelem_get_attr(const YrsBranch*, const YrsTransaction*, const char*)</code><br>
      * <i>native declaration : libyrs.h:1280</i>
      */
-    Pointer yxmlelem_get_attr(YrsBranch xml, YrsTransaction txn, String attr_name);
+    YrsOutput yxmlelem_get_attr(YrsBranch xml, YrsTransaction txn, String attr_name);
 
     /**
      * Returns an iterator over the `YXmlElement` attributes.
@@ -1680,7 +1680,7 @@ public interface YrsLibNativeInterface extends Library {
      * Original signature : <code>void yxmltext_insert_attr(const YrsBranch*, YrsTransaction*, const char*, const char*)</code><br>
      * <i>native declaration : libyrs.h:1478</i>
      */
-    void yxmltext_insert_attr(YrsBranch txt, YrsTransaction txn, String attr_name, String attr_value);
+    void yxmltext_insert_attr(YrsBranch txt, YrsTransaction txn, String attr_name, YrsInput attr_value);
 
     /**
      * Removes an attribute from a current `YXmlText`, given its name.
@@ -1705,7 +1705,7 @@ public interface YrsLibNativeInterface extends Library {
      * Original signature : <code>char* yxmltext_get_attr(const YrsBranch*, const YrsTransaction*, const char*)</code><br>
      * <i>native declaration : libyrs.h:1494</i>
      */
-    Pointer yxmltext_get_attr(YrsBranch txt, YrsTransaction txn, String attr_name);
+    YrsOutput yxmltext_get_attr(YrsBranch txt, YrsTransaction txn, String attr_name);
 
 
     /**

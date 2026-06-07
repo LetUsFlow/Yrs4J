@@ -21,9 +21,9 @@ public class YrsMapEntry extends Structure {
 	 * A `YrsOutput` value representing containing variadic content that can be stored withing map's
 <br>
 	 * entry.<br>
-	 * C type : YrsOutput
+	 * C type : const YrsOutput*
 	 */
-	public YrsOutput value;
+	public YrsOutput.ByReference value;
 	public YrsMapEntry() {
 		super();
 	}
@@ -36,9 +36,9 @@ public class YrsMapEntry extends Structure {
 	 * @param value A `YrsOutput` value representing containing variadic content that can be stored withing map's
 <br>
 	 * entry.<br>
-	 * C type : YrsOutput
+	 * C type : const YrsOutput*
 	 */
-	public YrsMapEntry(String key, YrsOutput value) {
+	public YrsMapEntry(String key, YrsOutput.ByReference value) {
 		super();
 		this.key = key;
 		this.value = value;

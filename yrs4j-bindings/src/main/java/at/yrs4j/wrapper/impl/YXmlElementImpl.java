@@ -46,7 +46,8 @@ public class YXmlElementImpl extends AbstractJNAWrapper<YrsBranch> implements YX
     @Override
     public String getAttr(YTransaction transaction, String attrName) {
         YrsTransaction txn = transaction.getWrappedObject();
-        return JNAUtils.getYrsString(Yrs4J.YRS_INSTANCE.yxmlelem_get_attr(wrappedObject, txn, attrName));
+        YrsOutput output = Yrs4J.YRS_INSTANCE.yxmlelem_get_attr(wrappedObject, txn, attrName);
+        return output == null ? null : YOutput.wrap(output).readString();
     }
 
     @Override
@@ -55,8 +56,9 @@ public class YXmlElementImpl extends AbstractJNAWrapper<YrsBranch> implements YX
         Objects.requireNonNull(attrValue);
 
         YrsTransaction txn = transaction.getWrappedObject();
+        YInput input = YInput.createString(attrValue);
 
-        Yrs4J.YRS_INSTANCE.yxmlelem_insert_attr(wrappedObject, txn, attrName, attrValue);
+        Yrs4J.YRS_INSTANCE.yxmlelem_insert_attr(wrappedObject, txn, attrName, input.getWrappedObject());
     }
 
     @Override

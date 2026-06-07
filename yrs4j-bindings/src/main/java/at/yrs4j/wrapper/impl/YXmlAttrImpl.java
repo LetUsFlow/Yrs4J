@@ -2,7 +2,7 @@ package at.yrs4j.wrapper.impl;
 
 import at.yrs4j.api.Yrs4J;
 import at.yrs4j.wrapper.AbstractDestroyableJNAWrapper;
-import at.yrs4j.wrapper.AbstractJNAWrapper;
+import at.yrs4j.wrapper.interfaces.YOutput;
 import at.yrs4j.wrapper.interfaces.YXmlAttr;
 import at.yrs4j.yrslib.YrsXmlAttr;
 
@@ -18,7 +18,7 @@ public class YXmlAttrImpl extends AbstractDestroyableJNAWrapper<YrsXmlAttr> impl
 
     @Override
     public String getValue() {
-        return wrappedObject.value.getString(0);
+        return YOutput.wrap(wrappedObject.value).readString();
     }
 
     @Override

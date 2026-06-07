@@ -14,8 +14,8 @@ import java.util.List;
 public class YrsXmlAttr extends Structure {
 	/** C type : const char* */
 	public Pointer name;
-	/** C type : const char* */
-	public Pointer value;
+	/** C type : const YrsOutput* */
+	public YrsOutput.ByReference value;
 	public YrsXmlAttr() {
 		super();
 	}
@@ -24,9 +24,9 @@ public class YrsXmlAttr extends Structure {
 	}
 	/**
 	 * @param name C type : const char*<br>
-	 * @param value C type : const char*
+	 * @param value C type : const YrsOutput*
 	 */
-	public YrsXmlAttr(Pointer name, Pointer value) {
+	public YrsXmlAttr(Pointer name, YrsOutput.ByReference value) {
 		super();
 		this.name = name;
 		this.value = value;
