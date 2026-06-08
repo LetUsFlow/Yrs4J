@@ -120,6 +120,19 @@ def nativeSourceDir = layout.buildDirectory.dir('native-src/y-crdt')
 def nativeTargetDir = layout.buildDirectory.dir('native-target')
 def nativeBuildScript = layout.projectDirectory.file('scripts/build-native.sh')
 
+def runCommand = { List commandLine ->
+    println ">> ${commandLine.join(' ')}"
+    def process = new ProcessBuilder(commandLine.collect { it.toString() })
+            .directory(project.projectDir)
+            .inheritIO()
+            .start()
+    def exitCode = process.waitFor()
+
+    if (exitCode != 0) {
+        throw new GradleException("Command failed with exit code ${exitCode}: ${commandLine.join(' ')}")
+    }
+}
+
 def nativeTargets = [
         [
                 name        : 'LinuxX64',
@@ -169,16 +182,10 @@ tasks.register('prepareNativeSource') {
 
         if (!gitDir.exists()) {
             sourceDir.parentFile.mkdirs()
-            exec {
-                commandLine 'git', 'clone', '--depth', '1', '--branch', "v${version}", 'https://github.com/y-crdt/y-crdt.git', sourceDir.absolutePath
-            }
+            runCommand(['git', 'clone', '--depth', '1', '--branch', "v${version}", 'https://github.com/y-crdt/y-crdt.git', sourceDir.absolutePath])
         } else {
-            exec {
-                commandLine 'git', '-C', sourceDir.absolutePath, 'fetch', '--tags', '--depth', '1', 'origin', "v${version}"
-            }
-            exec {
-                commandLine 'git', '-C', sourceDir.absolutePath, 'checkout', '--force', "v${version}"
-            }
+            runCommand(['git', '-C', sourceDir.absolutePath, 'fetch', '--tags', '--depth', '1', 'origin', "v${version}"])
+            runCommand(['git', '-C', sourceDir.absolutePath, 'checkout', '--force', "v${version}"])
         }
     }
 }
