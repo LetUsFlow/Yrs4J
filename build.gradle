@@ -60,22 +60,131 @@ project(':yrs4j-native-windows') {
     apply plugin: 'maven-publish'
 }
 
-def powershellExecutable = System.getProperty("os.name").toLowerCase().contains("windows") ? "powershell" : "pwsh"
+def nativeYrsVersion = providers.gradleProperty('nativeYrsVersion')
+        .orElse(providers.provider {
+            if (nativeLinuxVersion != nativeWindowsVersion) {
+                throw new GradleException("nativeLinuxVersion (${nativeLinuxVersion}) and nativeWindowsVersion (${nativeWindowsVersion}) must match, or pass -PnativeYrsVersion explicitly.")
+            }
+            nativeLinuxVersion
+        })
 
-tasks.register('buildNative', Exec) {
+def nativeSourceDir = layout.buildDirectory.dir('native-src/y-crdt')
+def nativeTargetDir = layout.buildDirectory.dir('native-target')
+def nativeBuildScript = layout.projectDirectory.file('scripts/build-native.sh')
+
+def nativeTargets = [
+        [
+                name        : 'LinuxX64',
+                family      : 'Linux',
+                rustTarget  : 'x86_64-unknown-linux-gnu',
+                buildTool   : 'cargo',
+                artifactName: 'libyrs.so',
+                resourcePath: 'yrs4j-native-linux/src/main/resources/linux-x86-64/libyrs.so'
+        ],
+        [
+                name        : 'LinuxAarch64',
+                family      : 'Linux',
+                rustTarget  : 'aarch64-unknown-linux-gnu',
+                buildTool   : 'cargo',
+                artifactName: 'libyrs.so',
+                resourcePath: 'yrs4j-native-linux/src/main/resources/linux-aarch64/libyrs.so'
+        ],
+        [
+                name        : 'WindowsX64',
+                family      : 'Windows',
+                rustTarget  : 'x86_64-pc-windows-msvc',
+                buildTool   : 'cargo-xwin',
+                artifactName: 'yrs.dll',
+                resourcePath: 'yrs4j-native-windows/src/main/resources/win32-x86-64/libyrs.dll'
+        ],
+        [
+                name        : 'WindowsAarch64',
+                family      : 'Windows',
+                rustTarget  : 'aarch64-pc-windows-msvc',
+                buildTool   : 'cargo-xwin',
+                artifactName: 'yrs.dll',
+                resourcePath: 'yrs4j-native-windows/src/main/resources/win32-aarch64/libyrs.dll'
+        ]
+]
+
+tasks.register('prepareNativeSource') {
     group = 'build'
-    description = 'Build all bundled yffi native libraries for Windows and Linux through scripts/build-native.ps1.'
-    commandLine powershellExecutable, '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', file('scripts/build-native.ps1').absolutePath
+    description = 'Fetch the pinned y-crdt source tree used for bundled yffi native libraries.'
+
+    inputs.property('yrsVersion', nativeYrsVersion)
+    outputs.dir(nativeSourceDir)
+
+    doLast {
+        def version = nativeYrsVersion.get()
+        def sourceDir = nativeSourceDir.get().asFile
+        def gitDir = new File(sourceDir, '.git')
+
+        if (!gitDir.exists()) {
+            sourceDir.parentFile.mkdirs()
+            exec {
+                commandLine 'git', 'clone', '--depth', '1', '--branch', "v${version}", 'https://github.com/y-crdt/y-crdt.git', sourceDir.absolutePath
+            }
+        } else {
+            exec {
+                commandLine 'git', '-C', sourceDir.absolutePath, 'fetch', '--tags', '--depth', '1', 'origin', "v${version}"
+            }
+            exec {
+                commandLine 'git', '-C', sourceDir.absolutePath, 'checkout', '--force', "v${version}"
+            }
+        }
+    }
 }
 
-tasks.register('buildNativeWindows', Exec) {
-    group = 'build'
-    description = 'Build bundled yffi native libraries for Windows x86_64 and aarch64.'
-    commandLine powershellExecutable, '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', file('scripts/build-native.ps1').absolutePath, '-Targets', 'windows-x64,windows-aarch64'
+def nativeBuildTasks = nativeTargets.collect { nativeTarget ->
+    tasks.register("buildNative${nativeTarget.name}", Exec) {
+        group = 'build'
+        description = "Build yffi for ${nativeTarget.rustTarget} and copy it into ${nativeTarget.resourcePath}."
+
+        dependsOn tasks.named('prepareNativeSource')
+
+        inputs.property('yrsVersion', nativeYrsVersion)
+        inputs.property('rustTarget', nativeTarget.rustTarget)
+        inputs.file(nativeBuildScript)
+        inputs.file(nativeSourceDir.map { it.file('yffi/Cargo.toml') })
+        inputs.file(nativeSourceDir.map { it.file('Cargo.lock') })
+        outputs.file(layout.projectDirectory.file(nativeTarget.resourcePath))
+
+        doFirst {
+            def sourceDir = nativeSourceDir.get().asFile
+            def targetDir = nativeTargetDir.get().asFile
+            def manifest = new File(sourceDir, 'yffi/Cargo.toml')
+            def cargoTargetDir = new File(targetDir, nativeTarget.rustTarget)
+            def builtArtifact = new File(cargoTargetDir, "${nativeTarget.rustTarget}/release/${nativeTarget.artifactName}")
+            def destination = layout.projectDirectory.file(nativeTarget.resourcePath).asFile
+
+            destination.parentFile.mkdirs()
+
+            commandLine 'bash',
+                    nativeBuildScript.asFile.absolutePath,
+                    '--target', nativeTarget.rustTarget,
+                    '--build-tool', nativeTarget.buildTool,
+                    '--manifest-path', manifest.absolutePath,
+                    '--target-dir', cargoTargetDir.absolutePath,
+                    '--built-artifact', builtArtifact.absolutePath,
+                    '--destination', destination.absolutePath
+        }
+    }
 }
 
-tasks.register('buildNativeLinux', Exec) {
+tasks.register('buildNativeLinux') {
     group = 'build'
-    description = 'Build bundled yffi native libraries for Linux x86_64 and aarch64 in WSL.'
-    commandLine powershellExecutable, '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', file('scripts/build-native.ps1').absolutePath, '-Targets', 'linux-x64,linux-aarch64'
+    description = 'Build bundled yffi native libraries for Linux x86_64 and aarch64.'
+    dependsOn nativeBuildTasks.findAll { it.name.endsWith('LinuxX64') || it.name.endsWith('LinuxAarch64') }
+}
+
+tasks.register('buildNativeWindows') {
+    group = 'build'
+    description = 'Build bundled yffi native libraries for Windows x86_64 and aarch64 from Linux using cargo-xwin.'
+    dependsOn nativeBuildTasks.findAll { it.name.endsWith('WindowsX64') || it.name.endsWith('WindowsAarch64') }
+}
+
+tasks.register('buildNative') {
+    group = 'build'
+    description = 'Build all bundled yffi native libraries for Linux and Windows from Linux.'
+    dependsOn nativeBuildTasks
 }

@@ -70,22 +70,27 @@ You need to define the repo in your build script to use the dependencies
 # Development
 
 ## Native Libraries
-The bundled native libraries are built from the upstream [y-crdt/y-crdt](https://github.com/y-crdt/y-crdt) `yffi` crate. The pinned version is read from `nativeLinuxVersion` and `nativeWindowsVersion` in `gradle.properties`; both currently point at `0.18.8`, so the build script checks out upstream tag `v0.18.8`.
+The bundled native libraries are built from the upstream [y-crdt/y-crdt](https://github.com/y-crdt/y-crdt) `yffi` crate. The pinned version is read from `nativeLinuxVersion` and `nativeWindowsVersion` in `gradle.properties`. Both values must match, unless you pass `-PnativeYrsVersion=<version>` explicitly.
 
-Build every supported native binary from Windows:
+The Gradle build exposes the native target matrix directly:
 
-    .\scripts\build-native.ps1
+    ./gradlew buildNative
+    ./gradlew buildNativeLinux
+    ./gradlew buildNativeWindows
+    ./gradlew buildNativeLinuxX64
+    ./gradlew buildNativeLinuxAarch64
+    ./gradlew buildNativeWindowsX64
+    ./gradlew buildNativeWindowsAarch64
 
-or through Gradle:
+Gradle fetches the pinned `y-crdt` source into `build/native-src/y-crdt`, then calls `scripts/build-native.sh` for each selected Rust target.
 
-    .\gradlew.bat buildNative
+The native build is Linux-first. Linux targets use `cargo build`; Windows targets use `cargo xwin build` to cross-compile MSVC binaries from Linux. Required tools:
 
-Build only one operating-system family:
-
-    .\gradlew.bat buildNativeWindows
-    .\gradlew.bat buildNativeLinux
-
-The Linux builds run inside WSL. The Linux aarch64 build expects the `aarch64-linux-gnu-gcc` cross linker to be available in WSL. The Windows aarch64 build uses Rust's `aarch64-pc-windows-msvc` target and requires the matching MSVC toolchain components.
+    git
+    rustup
+    cargo
+    cargo-xwin
+    aarch64-linux-gnu-gcc   # only for linux-aarch64
 
 The script copies the produced `yffi` `cdylib` artifacts into the JNA resource paths used by the native jars:
 
