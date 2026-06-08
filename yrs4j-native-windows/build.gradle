@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
 }
 
-group 'at.yrs4j'
+group = 'at.yrs4j'
 
 repositories {
     mavenCentral()
@@ -24,7 +24,7 @@ publishing {
     repositories {
         maven {
             name = 'FFWNexus'
-            url = 'https://nexus.freie-fantasy-welt.de/repository/libs/'  // Change to your Nexus URL
+            url = uri('https://nexus.freie-fantasy-welt.de/repository/libs/')  // Change to your Nexus URL
             credentials {
                 username = System.getenv("DEPLOYMENT_USER")
                 password = System.getenv("DEPLOYMENT_USER_PASSWD")

@@ -2,13 +2,13 @@ plugins {
     id 'java'
 }
 
-group 'at.yrs4j'
-version '1.0-SNAPSHOT'
+group = 'at.yrs4j'
+version = '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
     maven {
-        url "https://nexus.freie-fantasy-welt.de/repository/libs/"  // Change to your Nexus URL
+        url = uri("https://nexus.freie-fantasy-welt.de/repository/libs/")  // Change to your Nexus URL
     }
 }
 
