@@ -1,5 +1,5 @@
 # Yrs4J
-Yrs4J are Java JNA Bindings for [Yrs](https://github.com/y-crdt/y-crdt) . 
+Yrs4J provides Java JNA Bindings for [Yrs](https://github.com/y-crdt/y-crdt) . 
 It is still W.I.P. and by far not complete yet. 
 
 A very first alpha is available on my Nexus (see below for Repo infos).
@@ -9,11 +9,11 @@ This project is split up into 3 subprojects:
 - **yrs4j-native-windows** - This subproject includes the Windows-specific native libraries
 - **yrs4j-native-linux** - This subproject houses the Linux-specific native libraries
 
-# Usage
+## Usage
 To use Yrs4J add a dependency for the Bindings and for the Native-Lib (may be multiple) your code should run on (see *Artifacts & Repository* section below) . 
 
     implementation 'at.yrs4j:bindings:0.2.0-alpha'
-    implementation 'at.yrs4j:libnative-windows:0.18.8'
+    implementation 'at.yrs4j:libnative-windows:0.27.0'
 
 You then can use the bindings like this:
 
@@ -31,9 +31,9 @@ If you feel more comfortable using the JNA interface just use the native interfa
 
 As of now you may have to do that anyway since some of the functionality is not implemented as wrapper yet. You can also extend the wrapper layer by extending [AbstractJNAWrapper](https://github.com/segreeeen/Yrs4J/blob/main/yrs4j-bindings/src/main/java/at/yrs4j/wrapper/AbstractJNAWrapper.java).
 
-# Artifacts & Repository
+## Artifacts & Repository
 
-## Repository
+### Repository
 You need to define the repo in your build script to use the dependencies
 
     <repositories>
@@ -42,7 +42,7 @@ You need to define the repo in your build script to use the dependencies
         </repository>
     </repositories>
 
-## Bindings
+### Bindings
 
     <dependency>
         <groupId>at.yrs4j</groupId>
@@ -50,26 +50,26 @@ You need to define the repo in your build script to use the dependencies
         <version>0.2.0-alpha</version>
     </dependency>
 
-## Native Libs
+### Native Libs
 
-### Linux
+#### Linux
 
     <dependency>
         <groupId>at.yrs4j</groupId>
         <artifactId>libnative-linux</artifactId>
-        <version>0.18.8</version>
+        <version>0.27.0</version>
     </dependency>
 
-### Windows
+#### Windows
     <dependency>
         <groupId>at.yrs4j</groupId>
         <artifactId>libnative-windows</artifactId>
-        <version>0.18.8</version>
+        <version>0.27.0</version>
     </dependency>
 
-# Development
+## Development
 
-## Native Libraries
+### Native Libraries
 The bundled native libraries are built from the upstream [y-crdt/y-crdt](https://github.com/y-crdt/y-crdt) `yffi` crate. The pinned version is read from `nativeLinuxVersion` and `nativeWindowsVersion` in `gradle.properties`. Both values must match, unless you pass `-PnativeYrsVersion=<version>` explicitly.
 
 The Gradle build exposes the native target matrix directly:
@@ -82,15 +82,22 @@ The Gradle build exposes the native target matrix directly:
     ./gradlew buildNativeWindowsX64
     ./gradlew buildNativeWindowsAarch64
 
+Required Rust targets:
+
+    x86_64-unknown-linux-gnu
+    aarch64-unknown-linux-gnu
+    x86_64-pc-windows-msvc
+    aarch64-pc-windows-msvc
+
 Gradle fetches the pinned `y-crdt` source into `build/native-src/y-crdt`, then calls `scripts/build-native.sh` for each selected Rust target.
 
-The native build is Linux-first. Linux targets use `cargo build`; Windows targets use `cargo xwin build` to cross-compile MSVC binaries from Linux. Required tools:
+The native build is Linux-first. Linux targets use `cargo build`; Windows targets use `cargo xwin build` to cross-compile MSVC binaries from Linux. `scripts/build-native.sh` installs the selected Rust target with `rustup target add` before building. Required tools:
 
     git
     rustup
     cargo
     cargo-xwin
-    aarch64-linux-gnu-gcc   # only for linux-aarch64
+    gcc-aarch64-linux-gnu
 
 The script copies the produced `yffi` `cdylib` artifacts into the JNA resource paths used by the native jars:
 
@@ -99,7 +106,7 @@ The script copies the produced `yffi` `cdylib` artifacts into the JNA resource p
     yrs4j-native-windows/src/main/resources/win32-x86-64/libyrs.dll
     yrs4j-native-windows/src/main/resources/win32-aarch64/libyrs.dll
 
-## Building from Source
+### Building from Source
 In the root repository execute 
 
 In windows:

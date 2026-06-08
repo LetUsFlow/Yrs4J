@@ -8,6 +8,9 @@ apply plugin: 'java'
 group = 'at.yrs4j'
 version = '0.1.0'
 
+def githubPackagesRepository = providers.environmentVariable('GITHUB_REPOSITORY')
+        .orElse('letusflow/yrs4j')
+
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(21))
@@ -48,16 +51,61 @@ subprojects {
 project(':yrs4j-bindings') {
     apply plugin: 'java-library'
     apply plugin: 'maven-publish'
+    version = providers.gradleProperty('bindingsVersion').get()
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+                artifactId = 'bindings'
+            }
+        }
+    }
 }
 
 project(':yrs4j-native-linux') {
     apply plugin: 'java-library'
     apply plugin: 'maven-publish'
+    version = providers.gradleProperty('nativeLinuxVersion').get()
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+                artifactId = 'libnative-linux'
+            }
+        }
+    }
 }
 
 project(':yrs4j-native-windows') {
     apply plugin: 'java-library'
     apply plugin: 'maven-publish'
+    version = providers.gradleProperty('nativeWindowsVersion').get()
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+                artifactId = 'libnative-windows'
+            }
+        }
+    }
+}
+
+configure([project(':yrs4j-bindings'), project(':yrs4j-native-linux'), project(':yrs4j-native-windows')]) {
+    publishing {
+        repositories {
+            maven {
+                name = 'GitHubPackages'
+                url = uri("https://maven.pkg.github.com/${githubPackagesRepository.get()}")
+                credentials {
+                    username = findProperty('gpr.user') ?: System.getenv('GITHUB_ACTOR')
+                    password = findProperty('gpr.key') ?: System.getenv('GITHUB_TOKEN')
+                }
+            }
+        }
+    }
 }
 
 def nativeYrsVersion = providers.gradleProperty('nativeYrsVersion')

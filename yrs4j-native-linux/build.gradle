@@ -1,6 +1,5 @@
 plugins {
     id 'java'
-    id 'maven-publish'
 }
 
 group = 'at.yrs4j'
@@ -18,26 +17,4 @@ dependencies {
 
 test {
     useJUnitPlatform()
-}
-
-publishing {
-    repositories {
-        maven {
-            name = 'FFWNexus'
-            url = uri('https://nexus.freie-fantasy-welt.de/repository/libs/')  // Change to your Nexus URL
-            credentials {
-                username = System.getenv("DEPLOYMENT_USER")
-                password = System.getenv("DEPLOYMENT_USER_PASSWD")
-            }
-        }
-    }
-
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            groupId = 'at.yrs4j'
-            artifactId = 'libnative-linux'
-            version = project.nativeLinuxVersion
-        }
-    }
 }
