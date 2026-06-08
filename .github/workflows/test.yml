@@ -1,0 +1,55 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test ${{ matrix.target }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: linux-x86-64
+            runner: ubuntu-24.04
+            gradle-command: ./gradlew --no-daemon :yrs4j-tests:test
+          - target: linux-aarch64
+            runner: ubuntu-24.04-arm
+            gradle-command: ./gradlew --no-daemon :yrs4j-tests:test
+          - target: win32-x86-64
+            runner: windows-latest
+            gradle-command: .\gradlew.bat --no-daemon :yrs4j-tests:test
+          - target: win32-aarch64
+            runner: windows-11-arm
+            gradle-command: .\gradlew.bat --no-daemon :yrs4j-tests:test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make Gradle wrapper executable
+        if: runner.os != 'Windows'
+        run: chmod +x ./gradlew
+
+      - name: Run tests
+        run: ${{ matrix.gradle-command }}
