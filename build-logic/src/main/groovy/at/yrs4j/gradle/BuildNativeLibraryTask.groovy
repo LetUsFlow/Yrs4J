@@ -1,5 +1,6 @@
 package at.yrs4j.gradle
 
+import groovy.transform.CompileStatic
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
@@ -16,6 +17,7 @@ import org.gradle.work.DisableCachingByDefault
 
 import javax.inject.Inject
 
+@CompileStatic
 @DisableCachingByDefault(because = 'Depends on the locally installed Rust and cross-compilation toolchains')
 abstract class BuildNativeLibraryTask extends DefaultTask {
     @Input
@@ -50,16 +52,16 @@ abstract class BuildNativeLibraryTask extends DefaultTask {
 
     @TaskAction
     void buildNativeLibrary() {
-        String target = rustTarget.get()
-        String tool = buildTool.get()
-        File manifest = cargoManifest.get().asFile
-        File targetDir = cargoTargetDirectory.get().asFile
+        def target = rustTarget.get()
+        def tool = buildTool.get()
+        def manifest = cargoManifest.get().asFile
+        def targetDir = cargoTargetDirectory.get().asFile
 
         execOperations.exec {
-            commandLine 'rustup', 'target', 'add', target
+            it.commandLine 'rustup', 'target', 'add', target
         }
 
-        List<String> command = ['cargo']
+        def command = ['cargo']
         if (tool == 'cargo-xwin') {
             command.add('xwin')
         } else if (tool != 'cargo') {
@@ -74,23 +76,23 @@ abstract class BuildNativeLibraryTask extends DefaultTask {
         ])
 
         execOperations.exec {
-            commandLine command
+            it.commandLine command
             if (target == 'aarch64-unknown-linux-gnu') {
-                environment 'CC_aarch64_unknown_linux_gnu', 'aarch64-linux-gnu-gcc'
-                environment 'CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER', 'aarch64-linux-gnu-gcc'
+                it.environment 'CC_aarch64_unknown_linux_gnu', 'aarch64-linux-gnu-gcc'
+                it.environment 'CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER', 'aarch64-linux-gnu-gcc'
             }
         }
 
-        File builtArtifact = new File(targetDir, "${target}/release/${artifactName.get()}")
+        def builtArtifact = new File(targetDir, "${target}/release/${artifactName.get()}")
         if (!builtArtifact.isFile()) {
             throw new GradleException("Expected native library was not produced: ${builtArtifact}")
         }
 
-        File destinationFile = destination.get().asFile
+        def destinationFile = destination.get().asFile
         fileSystemOperations.copy {
-            from builtArtifact
-            into destinationFile.parentFile
-            rename { destinationFile.name }
+            it.from builtArtifact
+            it.into destinationFile.parentFile
+            it.rename { destinationFile.name }
         }
     }
 }

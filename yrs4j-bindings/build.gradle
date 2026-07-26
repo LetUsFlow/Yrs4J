@@ -4,10 +4,6 @@ plugins {
 
 group = 'at.yrs4j'
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testImplementation project(':yrs4j-native-windows')

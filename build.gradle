@@ -1,3 +1,60 @@
 plugins {
     id 'at.yrs4j.build'
+    id 'java'
+    id 'maven-publish'
+}
+
+group = 'at.yrs4j'
+version = '0.1.0'
+
+def javaLanguageVersion = JavaLanguageVersion.of(25)
+def githubPackagesRepository = providers.environmentVariable('GITHUB_REPOSITORY')
+        .getOrElse('letusflow/yrs4j')
+
+java {
+    toolchain {
+        languageVersion.set(javaLanguageVersion)
+    }
+    modularity.inferModulePath = true
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.8.1'
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    jvmArgs '--enable-native-access=ALL-UNNAMED',
+            '--illegal-native-access=deny'
+}
+
+subprojects {
+    repositories {
+        mavenCentral()
+    }
+
+    pluginManager.withPlugin('java') {
+        java {
+            toolchain {
+                languageVersion.set(javaLanguageVersion)
+            }
+            modularity.inferModulePath = true
+        }
+
+        dependencies {
+            testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.8.1'
+        }
+
+        tasks.withType(Test).configureEach {
+            useJUnitPlatform()
+            jvmArgs '--enable-native-access=ALL-UNNAMED',
+                    '--illegal-native-access=deny'
+        }
+    }
 }
