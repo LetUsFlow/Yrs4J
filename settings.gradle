@@ -1,5 +1,6 @@
 rootProject.name = 'yrs4j'
 
+includeBuild 'build-logic'
 include 'yrs4j-bindings'
 include 'yrs4j-native-linux'
 include 'yrs4j-native-windows'

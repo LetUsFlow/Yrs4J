@@ -99,9 +99,9 @@ x86_64-pc-windows-msvc
 aarch64-pc-windows-msvc
 ```
 
-Gradle fetches the pinned `y-crdt` source into `build/native-src/y-crdt`, then calls `scripts/build-native.sh` for each selected Rust target.
+Gradle fetches the pinned `y-crdt` source into `build/native-src/y-crdt`, then runs the native toolchain through the `at.yrs4j.build` build-logic plugin for each selected Rust target.
 
-The native build is Linux-first. Linux targets use `cargo build`; Windows targets use `cargo xwin build` to cross-compile MSVC binaries from Linux. `scripts/build-native.sh` installs the selected Rust target with `rustup target add` before building. Required tools:
+The native build is Linux-first. Linux targets use `cargo build`; Windows targets use `cargo xwin build` to cross-compile MSVC binaries from Linux. The build-logic plugin installs the selected Rust target with `rustup target add` before building. Required tools:
 ```
 git
 rustup
@@ -110,7 +110,7 @@ cargo-xwin
 gcc-aarch64-linux-gnu
 ```
 
-The script copies the produced `yffi` `cdylib` artifacts into the JNA resource paths used by the native jars:
+The build-logic plugin copies the produced `yffi` `cdylib` artifacts into the JNA resource paths used by the native jars:
 ```
 yrs4j-native-linux/src/main/resources/linux-x86-64/libyrs.so
 yrs4j-native-linux/src/main/resources/linux-aarch64/libyrs.so

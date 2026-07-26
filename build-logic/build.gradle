@@ -1,0 +1,13 @@
+plugins {
+    id 'groovy-gradle-plugin'
+}
+
+gradlePlugin {
+    plugins {
+        yrs4jBuild {
+            id = 'at.yrs4j.build'
+            implementationClass = 'at.yrs4j.gradle.Yrs4jBuildPlugin'
+        }
+    }
+}
+
