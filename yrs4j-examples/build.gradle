@@ -26,7 +26,10 @@ dependencies {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'at.yrs4j.example.Main'
+        attributes(
+                'Main-Class': 'at.yrs4j.example.Main',
+                'Enable-Native-Access': 'ALL-UNNAMED'
+        )
     }
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }

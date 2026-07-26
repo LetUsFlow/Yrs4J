@@ -11,13 +11,15 @@ This project is split up into 3 subprojects:
 
 ## Usage
 To use Yrs4J add a dependency for the Bindings and for the Native-Lib (may be multiple) your code should run on (see *Artifacts & Repository* section below) . 
-
-    implementation 'at.yrs4j:bindings:0.2.0-alpha'
-    implementation 'at.yrs4j:libnative-windows:0.27.0'
+```
+implementation 'at.yrs4j:bindings:0.2.0-alpha'
+implementation 'at.yrs4j:libnative-windows:0.27.0'
+```
 
 You then can use the bindings like this:
-
-    Yrs4J.init(WindowsLibLoader.create());
+```
+Yrs4J.init(WindowsLibLoader.create());
+```
 
 Analogous to WindowsLibLoader, if you use the Linux bindings use LinuxLibLoader.
 
@@ -26,8 +28,9 @@ After initialization you can then either use the wrapper classes (not complete a
 If you want to use the Wrapper, make sure to have a look at the [examples project](https://github.com/segreeeen/Yrs4J/blob/main/yrs4j-examples/src/main/java/at/yrs4j/example/Main.java). There are some of the examples/tests provided by [Yrs](https://github.com/y-crdt/y-crdt) implemented in Yrs4J.
 
 If you feel more comfortable using the JNA interface just use the native interface. You can get use the instance of the JNA bindings like this:
-
-    Yrs4J.YRS_INSTANCE.someNativeMethod(...)
+```
+Yrs4J.YRS_INSTANCE.someNativeMethod(...)
+```
 
 As of now you may have to do that anyway since some of the functionality is not implemented as wrapper yet. You can also extend the wrapper layer by extending [AbstractJNAWrapper](https://github.com/segreeeen/Yrs4J/blob/main/yrs4j-bindings/src/main/java/at/yrs4j/wrapper/AbstractJNAWrapper.java).
 
@@ -35,37 +38,42 @@ As of now you may have to do that anyway since some of the functionality is not 
 
 ### Repository
 You need to define the repo in your build script to use the dependencies
-
-    <repositories>
-        <repository>
-            <url>https://nexus.freie-fantasy-welt.de/repository/libs/</url>
-        </repository>
-    </repositories>
+```
+<repositories>
+    <repository>
+        <url>https://nexus.freie-fantasy-welt.de/repository/libs/</url>
+    </repository>
+</repositories>
+```
 
 ### Bindings
-
-    <dependency>
-        <groupId>at.yrs4j</groupId>
-        <artifactId>bindings</artifactId>
-        <version>0.2.0-alpha</version>
-    </dependency>
+```
+<dependency>
+    <groupId>at.yrs4j</groupId>
+    <artifactId>bindings</artifactId>
+    <version>0.2.0-alpha</version>
+</dependency>
+```
 
 ### Native Libs
 
 #### Linux
-
-    <dependency>
-        <groupId>at.yrs4j</groupId>
-        <artifactId>libnative-linux</artifactId>
-        <version>0.27.0</version>
-    </dependency>
+```
+<dependency>
+    <groupId>at.yrs4j</groupId>
+    <artifactId>libnative-linux</artifactId>
+    <version>0.27.0</version>
+</dependency>
+```
 
 #### Windows
-    <dependency>
-        <groupId>at.yrs4j</groupId>
-        <artifactId>libnative-windows</artifactId>
-        <version>0.27.0</version>
-    </dependency>
+```
+<dependency>
+    <groupId>at.yrs4j</groupId>
+    <artifactId>libnative-windows</artifactId>
+    <version>0.27.0</version>
+</dependency>
+```
 
 ## Development
 
@@ -73,54 +81,52 @@ You need to define the repo in your build script to use the dependencies
 The bundled native libraries are built from the upstream [y-crdt/y-crdt](https://github.com/y-crdt/y-crdt) `yffi` crate. The pinned version is read from `nativeLinuxVersion` and `nativeWindowsVersion` in `gradle.properties`. Both values must match, unless you pass `-PnativeYrsVersion=<version>` explicitly.
 
 The Gradle build exposes the native target matrix directly:
-
-    ./gradlew buildNative
-    ./gradlew buildNativeLinux
-    ./gradlew buildNativeWindows
-    ./gradlew buildNativeLinuxX64
-    ./gradlew buildNativeLinuxAarch64
-    ./gradlew buildNativeWindowsX64
-    ./gradlew buildNativeWindowsAarch64
+```
+./gradlew buildNative
+./gradlew buildNativeLinux
+./gradlew buildNativeWindows
+./gradlew buildNativeLinuxX64
+./gradlew buildNativeLinuxAarch64
+./gradlew buildNativeWindowsX64
+./gradlew buildNativeWindowsAarch64
+```
 
 Required Rust targets:
-
-    x86_64-unknown-linux-gnu
-    aarch64-unknown-linux-gnu
-    x86_64-pc-windows-msvc
-    aarch64-pc-windows-msvc
+```
+x86_64-unknown-linux-gnu
+aarch64-unknown-linux-gnu
+x86_64-pc-windows-msvc
+aarch64-pc-windows-msvc
+```
 
 Gradle fetches the pinned `y-crdt` source into `build/native-src/y-crdt`, then calls `scripts/build-native.sh` for each selected Rust target.
 
 The native build is Linux-first. Linux targets use `cargo build`; Windows targets use `cargo xwin build` to cross-compile MSVC binaries from Linux. `scripts/build-native.sh` installs the selected Rust target with `rustup target add` before building. Required tools:
-
-    git
-    rustup
-    cargo
-    cargo-xwin
-    gcc-aarch64-linux-gnu
+```
+git
+rustup
+cargo
+cargo-xwin
+gcc-aarch64-linux-gnu
+```
 
 The script copies the produced `yffi` `cdylib` artifacts into the JNA resource paths used by the native jars:
-
-    yrs4j-native-linux/src/main/resources/linux-x86-64/libyrs.so
-    yrs4j-native-linux/src/main/resources/linux-aarch64/libyrs.so
-    yrs4j-native-windows/src/main/resources/win32-x86-64/libyrs.dll
-    yrs4j-native-windows/src/main/resources/win32-aarch64/libyrs.dll
+```
+yrs4j-native-linux/src/main/resources/linux-x86-64/libyrs.so
+yrs4j-native-linux/src/main/resources/linux-aarch64/libyrs.so
+yrs4j-native-windows/src/main/resources/win32-x86-64/libyrs.dll
+yrs4j-native-windows/src/main/resources/win32-aarch64/libyrs.dll
+```
 
 ### Building from Source
-In the root repository execute 
-
-In windows:
-
-    gradlew.bat build
-
-In linux:
-
-     ./gradlew build
-
+In the root repository execute:
+```
+./gradlew build
+```
 to build all the subprojects. Then use yrs4j-examples as a testing ground for new developments.
     
 To test your changes with other projects you should be able to use your local maven repo by executing 
-
-    gradlew publishToMavenLocal
-
+```
+gradlew publishToMavenLocal
+```
 The maven packages should then be available in your local repository. You may have to change the version of the project you modified in the gradle.properties file, so that gradle recognizes the new version.

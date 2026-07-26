@@ -8,12 +8,14 @@ apply plugin: 'java'
 group = 'at.yrs4j'
 version = '0.1.0'
 
+def javaLanguageVersion = JavaLanguageVersion.of(25)
+
 def githubPackagesRepository = providers.environmentVariable('GITHUB_REPOSITORY')
         .orElse('letusflow/yrs4j')
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion.set(javaLanguageVersion)
     }
 }
 
@@ -34,6 +36,21 @@ test {
 // Apply common plugins and configurations to all subprojects
 subprojects {
     apply plugin: 'org.javamodularity.moduleplugin'
+
+    pluginManager.withPlugin('java') {
+        java {
+            toolchain {
+                languageVersion.set(javaLanguageVersion)
+            }
+        }
+
+        tasks.withType(Test).configureEach {
+            // JNA loads its JNI dispatcher at runtime. Grant access explicitly so
+            // current tests behave like future JDKs where missing access is denied.
+            jvmArgs '--enable-native-access=ALL-UNNAMED',
+                    '--illegal-native-access=deny'
+        }
+    }
 
     // Define repository where dependencies will be downloaded from
     repositories {
